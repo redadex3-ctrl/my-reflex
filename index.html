@@ -2,112 +2,409 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Test de Réflexes - Mesurez votre Vitesse de Réaction (ms)</title>
     <meta name="description" content="Testez votre temps de réaction. Benchmark gratuit développé par Mohamed Reda El Kalai.">
 
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Cpath d='M38 4L16 34h14l-6 26 24-30H34z' fill='%23fbbf24' stroke='%23ffffff' stroke-width='2'/%3E%3C/svg%3E">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <style>
         /* --- STYLE PRO (DASHBOARD MODERN) --- */
-        /* ⚠️ STYLE STRICTEMENT INCHANGÉ */
         :root {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --accent: #6366f1;
+            --bg-body: #0f172a;       
+            --bg-card: #1e293b;       
+            --accent: #6366f1;        
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border-color: rgba(255,255,255,0.08);
-            --color-wait: #ef4444;
-            --color-go: #22c55e;
+            
+            --color-wait: #ef4444;    
+            --color-go: #22c55e;      
         }
-        /* … tout le CSS original inchangé … */
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overscroll-behavior-y: none; 
+        }
+
+        /* --- HEADER --- */
+        .site-header {
+            width: 100%;
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 15px 30px;
+            box-sizing: border-box;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+        .logo-icon { margin-right: 10px; font-size: 1.4rem; }
+
+        /* --- CONTAINER --- */
+        .main-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            box-sizing: border-box;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* --- JEU --- */
+        #game-area {
+            width: 100%;
+            height: 420px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .state-start { background: var(--bg-card); }
+        @media (hover: hover) {
+            .state-start:hover { border-color: var(--accent); transform: translateY(-2px); }
+        }
+        
+        .state-waiting { background-color: var(--color-wait); }
+        .state-ready { background-color: var(--color-go); }
+
+        h1 { font-size: 3rem; margin: 0; font-weight: 800; letter-spacing: -1px; transition: font-size 0.3s; }
+        p.subtitle { font-size: 1.1rem; color: var(--text-muted); margin-top: 15px; font-weight: 500; }
+        .icon-big { font-size: 4rem; margin-bottom: 20px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); transition: font-size 0.3s; }
+
+        /* Icone Espace */
+        .space-key-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px; padding: 2px 10px; font-size: 0.85rem; font-weight: 700;
+            color: var(--text-main); text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2); margin: 0 5px;
+        }
+
+        .state-waiting *, .state-ready * { color: white !important; border-color: rgba(255,255,255,0.5) !important; }
+
+        /* --- HISTORIQUE --- */
+        .history-section {
+            margin-top: 30px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .history-title { font-size: 1rem; font-weight: 700; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .history-list { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+        .history-list::-webkit-scrollbar { display: none; }
+        .history-item {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            min-width: 60px;
+            text-align: center;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+        }
+        .history-item.best { border-color: var(--accent); color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+
+        /* --- CARDS INFO --- */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .info-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .info-card h3 { color: var(--accent); margin: 0 0 10px 0; font-size: 1.1rem; }
+        .info-card p { margin: 0; line-height: 1.5; color: var(--text-muted); font-size: 0.95rem; }
+        .dev-badge {
+            display: inline-block; margin-top: 15px; font-size: 0.8rem; font-weight: 700;
+            color: var(--text-main); background: rgba(255,255,255,0.05);
+            padding: 6px 12px; border-radius: 50px; border: 1px solid var(--border-color);
+        }
+
+        /* --- FOOTER PRO --- */
+        .site-footer {
+            width: 100%;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .footer-links { margin-bottom: 15px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--accent); }
+        .copyright { color: #64748b; font-size: 0.8rem; }
+
+        /* --- MODALE --- */
+        #result-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #result-modal.visible { opacity: 1; pointer-events: all; }
+        .result-card {
+            background: var(--bg-card); width: 100%; max-width: 420px; padding: 40px 30px;
+            border-radius: 24px; text-align: center; border: 1px solid var(--border-color);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); transform: scale(0.95); transition: transform 0.3s;
+        }
+        #result-modal.visible .result-card { transform: scale(1); }
+
+        .score-value { font-size: 4.5rem; font-weight: 900; color: var(--text-main); line-height: 1; margin: 10px 0; letter-spacing: -2px; }
+        .rank-badge { background: rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 50px; display: inline-block; margin-bottom: 20px; font-weight: 600; font-size: 0.9rem; }
+
+        .btn-primary {
+            background: var(--accent); color: white; border: none; width: 100%; padding: 16px;
+            font-size: 1.1rem; font-weight: 700; border-radius: 12px; cursor: pointer;
+            transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 10px;
+        }
+        
+        /* --- MEDIA QUERIES (MOBILE) --- */
+        @media (max-width: 768px) {
+            .site-header { padding: 10px 15px; }
+            .logo-container { font-size: 1rem; }
+            
+            #game-area { height: 350px; }
+            h1 { font-size: 2rem; }
+            .icon-big { font-size: 3rem; }
+            .score-value { font-size: 3.5rem; }
+            
+            .info-grid { grid-template-columns: 1fr; }
+            .history-section { padding: 15px; }
+        }
+
+        @media (max-width: 480px) {
+            #game-area { height: 50vh; max-height: 400px; }
+            h1 { font-size: 1.8rem; }
+        }
     </style>
 </head>
-
 <body>
 
-<header class="site-header">
-    <div class="logo-container">
-        <span class="logo-icon">🧠⚡</span>
-        <span>MY REFLEX</span>
-    </div>
-</header>
+    <header class="site-header">
+        <div class="logo-container">
+            <span class="logo-icon">🧠⚡</span> 
+            <span>MY REFLEX</span>
+        </div>
+    </header>
 
-<!-- === AD SPACE : SCRIPT SUPPRIMÉ === -->
-<div class="ad-space"></div>
+    <div class="main-container">
+        
+        <div id="game-area" class="state-start">
+            <div class="icon-big" id="main-icon">⚡</div>
+            <h1 id="main-text">Start Test</h1>
+            <p class="subtitle" id="sub-text">Chargement...</p>
+        </div>
 
-<div class="main-container">
+        <div class="history-section">
+            <div class="history-title">📜 Vos Derniers Scores</div>
+            <div class="history-list" id="score-history">
+                <div class="history-item" style="opacity:0.5">--</div>
+                <div class="history-item" style="opacity:0.5">--</div>
+                <div class="history-item" style="opacity:0.5">--</div>
+            </div>
+        </div>
 
-    <div id="game-area" class="state-start" onclick="handleGameClick()">
-        <div class="icon-big" id="main-icon">⚡</div>
-        <h1 id="main-text">Start Test</h1>
-        <p class="subtitle" id="sub-text">
-            Appuyez sur <span class="space-key-icon">Space</span> ou Cliquez
-        </p>
-    </div>
-
-    <div class="history-section">
-        <div class="history-title">📜 Vos Derniers Scores</div>
-        <div class="history-list" id="score-history">
-            <div class="history-item" style="opacity:0.5">--</div>
-            <div class="history-item" style="opacity:0.5">--</div>
-            <div class="history-item" style="opacity:0.5">--</div>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>👨‍💻 Développeur</h3>
+                <p>Plateforme d'analyse haute précision conçue pour évaluer et optimiser la vitesse de traitement neurologique.</p>
+                <span class="dev-badge">MOHAMED REDA EL KALAI</span>
+            </div>
+            <div class="info-card">
+                <h3>📊 Statistiques Mondiales</h3>
+                <p>• Moyenne : <strong>250ms</strong><br>• Pro Gamer : <strong>160ms</strong><br>• Pilote F1 : <strong>120ms</strong></p>
+            </div>
         </div>
     </div>
 
-    <div class="info-grid">
-        <div class="info-card">
-            <h3>👨‍💻 Développeur</h3>
-            <p>Plateforme d'analyse haute précision conçue pour évaluer et optimiser la vitesse de traitement neurologique.</p>
-            <span class="dev-badge">MOHAMED REDA EL KALAI</span>
+    <footer class="site-footer">
+        <div class="footer-links">
+            <a href="#">Conditions</a>
+            <a href="#">Confidentialité</a>
+            <a href="#">Contact</a>
         </div>
-        <div class="info-card">
-            <h3>📊 Statistiques Mondiales</h3>
-            <p>• Moyenne : <strong>250ms</strong><br>• Pro Gamer : <strong>160ms</strong><br>• Pilote F1 : <strong>120ms</strong></p>
+        <div class="copyright">
+            © 2025 MyReflex Inc. Tous droits réservés.<br>
+            Design by Mohamed Reda El Kalai.
+        </div>
+    </footer>
+
+    <div id="result-modal">
+        <div class="result-card">
+            
+            <div class="rank-badge" id="rank-title">ANALYSE...</div>
+            <div class="score-value" id="score-display">0 ms</div>
+            <p id="rank-desc" style="color:var(--text-muted); margin-bottom:20px;">Description</p>
+            
+            <button class="btn-primary" onclick="resetGame()">
+                <span id="btn-restart-text">🔄 Réessayer</span>
+            </button>
         </div>
     </div>
-</div>
 
-<footer class="site-footer">
-    <div class="footer-links">
-        <a href="#">Conditions</a>
-        <a href="#">Confidentialité</a>
-        <a href="#">Contact</a>
-    </div>
-    <div class="copyright">
-        © 2025 MyReflex Inc. Tous droits réservés.<br>
-        Design by Mohamed Reda El Kalai.
-    </div>
-</footer>
+    <script>
+        const gameArea = document.getElementById('game-area');
+        const mainText = document.getElementById('main-text');
+        const subText = document.getElementById('sub-text');
+        const mainIcon = document.getElementById('main-icon');
+        const modal = document.getElementById('result-modal');
+        const historyContainer = document.getElementById('score-history');
 
-<div id="result-modal">
-    <div class="result-card">
+        let startTime, timeoutId;
+        let gameState = 'start'; 
+        let lastScore = 0;
+        let scores = [];
 
-        <div class="rank-badge" id="rank-title">ANALYSE...</div>
-        <div class="score-value" id="score-display">0 ms</div>
-        <p id="rank-desc" style="color:var(--text-muted); margin-bottom:20px;">Description</p>
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const actionText = isMobile ? "Touchez l'écran" : "Appuyez sur <span class='space-key-icon'>Space</span>";
+        const restartText = isMobile ? "🔄 Réessayer (Touch)" : "🔄 Réessayer <span class='space-key-icon'>Space</span>";
 
-        <div class="share-buttons">
-            <button class="btn-share share-wa" onclick="shareWhatsapp()">📲 WhatsApp</button>
-            <button class="btn-share share-x" onclick="shareTwitter()">✖ Twitter</button>
-        </div>
+        subText.innerHTML = actionText;
+        document.getElementById('btn-restart-text').innerHTML = restartText;
 
-        <!-- === MODAL AD : SCRIPT SUPPRIMÉ === -->
-        <div class="modal-ad-container"></div>
+        function triggerGameAction(e) {
+            if (e.target.tagName === 'A') return;
+            if (e.type === 'touchstart') e.preventDefault(); 
+            if (modal.classList.contains('visible')) return;
+            handleGameClick();
+        }
 
-        <button class="btn-primary" onclick="resetGame()">
-            🔄 Réessayer <span class="space-key-icon">Space</span>
-        </button>
-    </div>
-</div>
+        gameArea.addEventListener('mousedown', triggerGameAction);
+        gameArea.addEventListener('touchstart', triggerGameAction, {passive: false});
 
-<script>
-    /* === JS ORIGINAL STRICTEMENT INCHANGÉ === */
-    /* (aucune ligne modifiée, aucune suppression ici) */
-</script>
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' || event.key === ' ') {
+                event.preventDefault(); 
+                if (modal.classList.contains('visible')) resetGame();
+                else handleGameClick();
+            }
+        });
 
+        function getRank(time) {
+            if (time < 180) return { title: "👽 DIVIN", desc: "Temps de réaction inhumain !", color: "#8b5cf6" };
+            if (time < 220) return { title: "🏎️ ÉLITE", desc: "Niveau Pilote de F1", color: "#22c55e" };
+            if (time < 260) return { title: "🎮 GAMER", desc: "Très solide.", color: "#3b82f6" };
+            if (time < 300) return { title: "😐 MOYEN", desc: "Standard humain.", color: "#f59e0b" };
+            return { title: "☕ FATIGUÉ", desc: "Tu dors ?", color: "#ef4444" };
+        }
+
+        function handleGameClick() {
+            if (gameState === 'start') startGame();
+            else if (gameState === 'waiting') failedTooSoon();
+            else if (gameState === 'ready') finishGame();
+        }
+
+        function startGame() {
+            gameState = 'waiting';
+            gameArea.className = 'state-waiting';
+            mainText.innerText = "Attendez...";
+            subText.innerHTML = "Dès que c'est vert...";
+            mainIcon.innerText = "✋";
+            
+            const delay = Math.floor(Math.random() * 3000) + 2000;
+            timeoutId = setTimeout(() => {
+                gameState = 'ready';
+                gameArea.className = 'state-ready';
+                mainText.innerText = "TAPPEZ !";
+                subText.innerText = "";
+                mainIcon.innerText = "💥";
+                startTime = Date.now();
+            }, delay);
+        }
+
+        function failedTooSoon() {
+            clearTimeout(timeoutId);
+            gameArea.className = 'state-start';
+            mainText.innerText = "Trop tôt !";
+            subText.innerHTML = "Pénalité... Recommencez.";
+            mainIcon.innerText = "⚠️";
+            gameState = 'start';
+            
+            setTimeout(() => {
+                if(gameState === 'start') subText.innerHTML = actionText;
+            }, 1500);
+        }
+
+        function finishGame() {
+            const time = Date.now() - startTime;
+            lastScore = time;
+            updateHistory(time);
+
+            const rank = getRank(time);
+            document.getElementById('score-display').innerText = time + " ms";
+            document.getElementById('score-display').style.color = rank.color;
+            document.getElementById('rank-title').innerText = rank.title;
+            document.getElementById('rank-desc').innerText = rank.desc;
+
+            modal.classList.add('visible');
+        }
+
+        function updateHistory(score) {
+            scores.unshift(score);
+            if (scores.length > 5) scores.pop();
+
+            let html = '';
+            let best = Math.min(...scores);
+            
+            scores.forEach(s => {
+                let isBest = (s === best) ? 'best' : '';
+                html += `<div class="history-item ${isBest}">${s} ms</div>`;
+            });
+            historyContainer.innerHTML = html;
+        }
+
+        function resetGame() {
+            modal.classList.remove('visible');
+            gameState = 'start';
+            gameArea.className = 'state-start';
+            mainText.innerText = "Prêt ?";
+            subText.innerHTML = actionText;
+            mainIcon.innerText = "⚡";
+        }
+    </script>
 </body>
 </html>

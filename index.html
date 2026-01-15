@@ -315,7 +315,6 @@
 
         let startTime, timeoutId;
         let gameState = 'start'; 
-        let retryCount = 0;
         let lastScore = 0;
         let scores = [];
 
@@ -412,11 +411,7 @@
         }
 
         function resetGame() {
-            retryCount++;
-            if (retryCount % 2 !== 0) {
-                // Lien SmartLink conservé (s'ouvre 1 fois sur 2)
-                window.open('https://www.effectivegatecpm.com/yjte5xm0?key=2cc567c1130b195fc537d727fe0c62e0', '_blank');
-            }
+            // SUPPRESSION DU SMARTLINK : On ne fait que relancer le jeu
             modal.classList.remove('visible');
             gameState = 'start';
             gameArea.className = 'state-start';
@@ -425,6 +420,5 @@
             mainIcon.innerText = "⚡";
         }
     </script>
-    
-    </body>
+</body>
 </html>

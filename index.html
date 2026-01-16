@@ -33,6 +33,12 @@
             align-items: center;
             min-height: 100vh;
             overscroll-behavior-y: none; 
+            
+            /* Protection sélection texte */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         /* --- HEADER --- */
@@ -117,9 +123,68 @@
 
         .state-waiting *, .state-ready * { color: white !important; border-color: rgba(255,255,255,0.5) !important; }
 
+        /* --- ADS CONFIGURATION (NOUVEAU) --- */
+        
+        /* Pub Desktop (Rectangle) */
+        .desktop-ad-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            width: 100%;
+        }
+
+        /* Pub Mobile (Sticky Footer) */
+        .mobile-sticky-ad {
+            display: none; /* Caché par défaut sur PC */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #0f172a;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+
+        /* --- MEDIA QUERIES (RESPONSIVE ADS) --- */
+        @media (max-width: 768px) {
+            /* On cache la pub PC sur mobile */
+            .desktop-ad-container {
+                display: none !important;
+            }
+
+            /* On affiche la pub sticky sur mobile */
+            .mobile-sticky-ad {
+                display: flex;
+            }
+
+            /* On ajoute un espace en bas du body pour que la pub ne cache rien */
+            body {
+                padding-bottom: 70px !important;
+            }
+
+            .site-header { padding: 10px 15px; }
+            .logo-container { font-size: 1rem; }
+            #game-area { height: 350px; }
+            h1 { font-size: 2rem; }
+            .icon-big { font-size: 3rem; }
+            .score-value { font-size: 3.5rem; }
+            .info-grid { grid-template-columns: 1fr; }
+            .history-section { padding: 15px; }
+        }
+
+        @media (max-width: 480px) {
+            #game-area { height: 50vh; max-height: 400px; }
+            h1 { font-size: 1.8rem; }
+        }
+
         /* --- HISTORIQUE --- */
         .history-section {
-            margin-top: 30px;
+            margin-top: 10px; /* Réduit un peu car il y a la pub */
             background: var(--bg-card);
             border-radius: 16px;
             padding: 20px;
@@ -201,25 +266,6 @@
             transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px;
             margin-top: 10px;
         }
-        
-        /* --- MEDIA QUERIES (MOBILE) --- */
-        @media (max-width: 768px) {
-            .site-header { padding: 10px 15px; }
-            .logo-container { font-size: 1rem; }
-            
-            #game-area { height: 350px; }
-            h1 { font-size: 2rem; }
-            .icon-big { font-size: 3rem; }
-            .score-value { font-size: 3.5rem; }
-            
-            .info-grid { grid-template-columns: 1fr; }
-            .history-section { padding: 15px; }
-        }
-
-        @media (max-width: 480px) {
-            #game-area { height: 50vh; max-height: 400px; }
-            h1 { font-size: 1.8rem; }
-        }
     </style>
 </head>
 <body>
@@ -239,6 +285,18 @@
             <p class="subtitle" id="sub-text">Chargement...</p>
         </div>
 
+        <div class="desktop-ad-container">
+            <script>
+                atOptions = {
+                    'key' : 'dce25f9a665004b4dfba5e60caaca718',
+                    'format' : 'iframe',
+                    'height' : 250,
+                    'width' : 300,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//www.highperformanceformat.com/dce25f9a665004b4dfba5e60caaca718/invoke.js"></script>
+        </div>
         <div class="history-section">
             <div class="history-title">📜 Vos Derniers Scores</div>
             <div class="history-list" id="score-history">
@@ -273,6 +331,18 @@
         </div>
     </footer>
 
+    <div class="mobile-sticky-ad">
+        <script>
+            atOptions = {
+                'key' : 'e61f36d2718e7ee78d6b8115149364c2',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="//www.highperformanceformat.com/e61f36d2718e7ee78d6b8115149364c2/invoke.js"></script>
+    </div>
     <div id="result-modal">
         <div class="result-card">
             
@@ -352,7 +422,8 @@
                 mainText.innerText = "TAPPEZ !";
                 subText.innerText = "";
                 mainIcon.innerText = "💥";
-                startTime = Date.now();
+                // OPTIMISATION : Utilisation de performance.now() pour la précision scientifique
+                startTime = performance.now();
             }, delay);
         }
 
@@ -370,7 +441,10 @@
         }
 
         function finishGame() {
-            const time = Date.now() - startTime;
+            // OPTIMISATION : Calcul précis
+            const rawTime = performance.now() - startTime;
+            const time = Math.floor(rawTime);
+            
             lastScore = time;
             updateHistory(time);
 
